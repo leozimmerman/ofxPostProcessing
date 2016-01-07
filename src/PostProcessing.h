@@ -44,6 +44,7 @@ namespace itg
         void init(unsigned width = ofGetWidth(), unsigned height = ofGetHeight(), bool arb = false);
         void begin();
         void begin(ofCamera& cam);
+        void begin(ofCamera& cam, ofRectangle viewprt);///tweak:)
         void end(bool autoDraw = true);
         
         // float rather than int and not const to override ofBaseDraws

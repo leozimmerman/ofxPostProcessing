@@ -113,6 +113,34 @@ namespace itg
         glPushAttrib(GL_ENABLE_BIT);
     }
     
+    ///my tweak :)
+    void PostProcessing::begin(ofCamera& cam, ofRectangle viewprt)
+    {
+       
+        // update camera matrices
+        cam.begin(viewprt);
+        cam.end();
+        
+        raw.begin(false);
+        
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadMatrixf(cam.getProjectionMatrix(ofRectangle(0, 0, width, height)).getPtr());
+        glLoadMatrixf(cam.getProjectionMatrix(viewprt).getPtr());
+        
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadMatrixf(cam.getModelViewMatrix().getPtr());
+        
+        glViewport(0,0, viewprt.getWidth(), viewprt.getHeight());
+        glViewport(0, 0, raw.getWidth(), raw.getHeight());
+        
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        
+        ofPushStyle();
+        glPushAttrib(GL_ENABLE_BIT);
+    }
+    
     void PostProcessing::end(bool autoDraw)
     {
         glPopAttrib();
