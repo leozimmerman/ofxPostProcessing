@@ -33,9 +33,10 @@
 
 //#define _ITG_TWEAKABLE
 
-#include "ofFbo.h"
-#include "ofVec3f.h"
-#include "ofShader.h"
+#include "ofMain.h"
+//#include "ofFbo.h"
+//#include "ofVec3f.h"
+//#include "ofShader.h"
 #ifdef _ITG_TWEAKABLE
     #include "Tweakable.h"
 #endif
@@ -71,6 +72,8 @@ namespace itg
         void setArb(bool arb) { this->arb = arb; }
         
         virtual bool hasArbShader() { return false; }
+        
+        void setProgrammable(bool isProg){ this->isProgrammable = isProg; }
 
 #ifndef _ITG_TWEAKABLE
         string getName() const { return name; }
@@ -80,8 +83,26 @@ namespace itg
         void texturedQuad(float x, float y, float width, float height, float s = 1.0, float t = 1.0);
         
         ofVec2f aspect;
+        ofVbo vbo;
         
         bool arb;
+        
+        bool isProgrammable;
+        
+        string progVertShaderSrc = STRINGIFY(
+                                         
+                                         uniform mat4 modelViewProjectionMatrix;
+                                         layout(location = 0) in vec4 position;
+                                         layout(location = 2) in vec4 color;
+                                         layout(location = 3) in vec2 texcoord;
+                                         
+                                         out vec2 vUv;
+                                         
+                                         void main(){
+                                             vUv = texcoord;
+                                             gl_Position = modelViewProjectionMatrix * position;
+                                         }
+                                    );
     
     private:
 #ifndef _ITG_TWEAKABLE

@@ -36,26 +36,69 @@ namespace itg
     KaleidoscopePass::KaleidoscopePass(const ofVec2f& aspect, bool arb, float segments) :
         segments(segments), RenderPass(aspect, arb, "kaleido")
     {
-        string fragShaderSrc = STRINGIFY(
-            uniform sampler2D tex;
-            uniform float segments;
-             
-            void main()
-            {
-                vec2 uv = gl_TexCoord[0].st;
-                vec2 normed = 2.0 * uv - 1.0;
-                float r = length(normed);
-                float theta = atan(normed.y / abs(normed.x));
-                theta *= segments;
-                
-                vec2 newUv = (vec2(r * cos(theta), r * sin(theta)) + 1.0) / 2.0;
-                 
-                gl_FragColor = texture2D(tex, newUv);
-            }
-        );
         
-        shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragShaderSrc);
-        shader.linkProgram();
+        if(isProgrammable){
+            
+            ostringstream oss;
+            oss << "#version 330"<< endl << this->progVertShaderSrc;
+            shader.setupShaderFromSource(GL_VERTEX_SHADER, oss.str());
+            
+            string fragShaderSrc = STRINGIFY(
+                                             
+                                             uniform sampler2D tex;
+                                             uniform float segments;
+                                             
+                                             in vec2 vUv;
+                                             out vec4 fragColor;
+                                             
+                                             void main(){
+                                                 
+                                                 //vec2 uv = vUv;
+                                                 vec2 normed = 2.0 * vUv - 1.0;
+                                                 float r = length(normed);
+                                                 float theta = atan(normed.y / abs(normed.x));
+                                                 theta *= segments;
+                                                 
+                                                 vec2 newUv = (vec2(r * cos(theta), r * sin(theta)) + 1.0) / 2.0;
+                                                 
+                                                 fragColor = texture(tex, newUv);
+                                                 
+                                             }
+                                             );
+            oss.str("");//clear
+            oss << "#version 330" << endl;
+            oss << fragShaderSrc;
+            
+            shader.setupShaderFromSource(GL_FRAGMENT_SHADER, oss.str());
+            shader.linkProgram();
+
+        
+        }else{
+        
+            string fragShaderSrc = STRINGIFY(
+                                             uniform sampler2D tex;
+                                             uniform float segments;
+                                             
+                                             void main()
+                                             {
+                                                 vec2 uv = gl_TexCoord[0].st;
+                                                 vec2 normed = 2.0 * uv - 1.0;
+                                                 float r = length(normed);
+                                                 float theta = atan(normed.y / abs(normed.x));
+                                                 theta *= segments;
+                                                 
+                                                 vec2 newUv = (vec2(r * cos(theta), r * sin(theta)) + 1.0) / 2.0;
+                                                 
+                                                 gl_FragColor = texture2D(tex, newUv);
+                                             }
+                                             );
+            
+            shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragShaderSrc);
+            shader.linkProgram();
+            
+        }
+        
+        
 #ifdef _ITG_TWEAKABLE
         addParameter("segs", this->segments, "min=-20 max=20");
 #endif

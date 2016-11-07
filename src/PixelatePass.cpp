@@ -36,20 +36,60 @@ namespace itg
     PixelatePass::PixelatePass(const ofVec2f& aspect, bool arb, const ofVec2f& resolution) :
         resolution(resolution), RenderPass(aspect, arb, "pixelate")
     {
-        string fragShaderSrc = STRINGIFY(
-            uniform sampler2D tex;
-            uniform float xPixels;
-            uniform float yPixels;
-            
-            void main()
-            {
-                vec2 texCoords = vec2(floor(gl_TexCoord[0].s * xPixels) / xPixels, floor(gl_TexCoord[0].t * yPixels) / yPixels);
-                gl_FragColor = texture2D(tex, texCoords);
-            }
-        );
         
-        shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragShaderSrc);
-        shader.linkProgram();
+        
+        
+        if(isProgrammable){
+            
+            ostringstream oss;
+            oss << "#version 330"<< endl << this->progVertShaderSrc;
+            shader.setupShaderFromSource(GL_VERTEX_SHADER, oss.str());
+            
+            string fragShaderSrc = STRINGIFY(
+                                      
+                                      uniform sampler2D tex;
+                                      uniform float xPixels;
+                                      uniform float yPixels;
+                                      
+                                      in vec2 vUv;
+                                      out vec4 fragColor;
+                                      
+                                      void main()
+                                      {
+                                          vec2 texCoords = vec2( floor (vUv.s * xPixels) / xPixels, floor (vUv.t * yPixels) / yPixels );
+                                          fragColor = texture(tex, texCoords);
+                                          
+                                      }
+                                      );
+            oss.str("");//clear
+            oss << "#version 330" << endl;
+            oss << fragShaderSrc;
+            
+            shader.setupShaderFromSource(GL_FRAGMENT_SHADER, oss.str());
+            shader.linkProgram();
+        
+        }else{
+            
+            string fragShaderSrc = STRINGIFY(
+                                             uniform sampler2D tex;
+                                             uniform float xPixels;
+                                             uniform float yPixels;
+                                      
+                                             void main()
+                                             {
+                                                 vec2 texCoords = vec2(floor(gl_TexCoord[0].s * xPixels) / xPixels, floor(gl_TexCoord[0].t * yPixels) / yPixels);
+                                                 gl_FragColor = texture2D(tex, texCoords);
+                                             }
+                                             );
+            
+            shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragShaderSrc);
+            
+            shader.linkProgram();
+        }
+        
+        
+       
+        
 #ifdef _ITG_TWEAKABLE
         addParameter("x", this->resolution.x, "min=1 max=1000");
         addParameter("y", this->resolution.y, "min=1 max=1000");
@@ -58,14 +98,18 @@ namespace itg
     
     void PixelatePass::render(ofFbo& readFbo, ofFbo& writeFbo)
     {
+
         writeFbo.begin();
         
         shader.begin();
+        
         shader.setUniformTexture("tex", readFbo.getTexture(), 0);
+
         shader.setUniform1f("xPixels", resolution.x);
         shader.setUniform1f("yPixels", resolution.y);
         
         texturedQuad(0, 0, writeFbo.getWidth(), writeFbo.getHeight());
+    
         
         shader.end();
         writeFbo.end();

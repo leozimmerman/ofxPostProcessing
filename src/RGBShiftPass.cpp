@@ -38,25 +38,65 @@ namespace itg
         amount(amount), angle(angle), RenderPass(aspect, arb, "RGBShift")
     {
         
-        string fragShaderSrc = STRINGIFY(
-                                         uniform sampler2D tDiffuse;
-                                         uniform float amount;
-                                         uniform float angle;
-                        
-                                         void main() {
-                                         vec2 vUv = gl_TexCoord[0].st;
-                                         vec2 offset = amount * vec2( cos(angle), sin(angle));
-                                         vec4 cr = texture2D(tDiffuse, vUv + offset);
-                                         vec4 cga = texture2D(tDiffuse, vUv);
-                                         vec4 cb = texture2D(tDiffuse, vUv - offset);
-                                         gl_FragColor = vec4(cr.r, cga.g, cb.b, cga.a);
-                                         
-                                         }
-        );
         
-    
-        shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragShaderSrc);
-        shader.linkProgram();
+        if (isProgrammable){
+            
+            ostringstream oss;
+            oss << "#version 330"<< endl << this->progVertShaderSrc;
+            shader.setupShaderFromSource(GL_VERTEX_SHADER, oss.str());
+            
+            string fragShaderSrc = STRINGIFY(
+                                             
+                                             uniform sampler2D tDiffuse;
+                                             uniform float amount;
+                                             uniform float angle;
+                                             
+                                             in vec2 vUv;
+                                             out vec4 fragColor;
+                                             
+                                             void main(){
+                                                 
+                                                 vec2 offset = amount * vec2( cos(angle), sin(angle));
+                                                 vec4 cr = texture(tDiffuse, vUv + offset);
+                                                 vec4 cga = texture(tDiffuse, vUv);
+                                                 vec4 cb = texture(tDiffuse, vUv - offset);
+                                                 fragColor = vec4(cr.r, cga.g, cb.b, cga.a);
+                                                 
+                                             }
+                                            );
+            oss.str("");//clear
+            oss << "#version 330" << endl;
+            oss << fragShaderSrc;
+            
+            shader.setupShaderFromSource(GL_FRAGMENT_SHADER, oss.str());
+            shader.linkProgram();
+
+            
+        
+        }else{
+            
+            string fragShaderSrc = STRINGIFY(
+                                             uniform sampler2D tDiffuse;
+                                             uniform float amount;
+                                             uniform float angle;
+                                             
+                                             void main() {
+                                                 vec2 vUv = gl_TexCoord[0].st;
+                                                 vec2 offset = amount * vec2( cos(angle), sin(angle));
+                                                 vec4 cr = texture2D(tDiffuse, vUv + offset);
+                                                 vec4 cga = texture2D(tDiffuse, vUv);
+                                                 vec4 cb = texture2D(tDiffuse, vUv - offset);
+                                                 gl_FragColor = vec4(cr.r, cga.g, cb.b, cga.a);
+                                                 
+                                             }
+                                             );
+            
+            
+            shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragShaderSrc);
+            shader.linkProgram();
+
+        }
+        
         
     }
     

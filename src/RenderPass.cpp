@@ -42,6 +42,8 @@ namespace itg
         aspect(aspect), enabled(true), arb(arb), name(name)
     {
 #endif
+        
+        isProgrammable = ofIsGLProgrammableRenderer();
     }
     
     void RenderPass::render(ofFbo& readFbo, ofFbo& writeFbo, ofTexture& depth)
@@ -51,19 +53,51 @@ namespace itg
     
     void RenderPass::texturedQuad(float x, float y, float width, float height, float s, float t)
     {
-        // TODO: change to triangle fan/strip
-        glBegin(GL_QUADS);
-        glTexCoord2f(0, 0);
-        glVertex3f(x, y, 0);
         
-        glTexCoord2f(s, 0);
-        glVertex3f(x + width, y, 0);
+        if (isProgrammable) {
+
+            //https://github.com/local-projects/ofxPostProcessing/commit/1382281af13071290996d4eebdadf4c170c446c8#diff-c8aa817accf2e0d8a2a27d335cb6c90e
+            
+            const float verts[] = {
+            				x,y,0,
+            				x + width, y, 0,
+            				x + width,y + height, 0,
+            				x,y + height, 0,
+                
+            };
+            
+            const float tex[] = {
+                0,0,
+                s,0,
+                s,t,
+                0,t,
+            };
+            
+            vbo.setVertexData(&verts[0], 3, 4, GL_DYNAMIC_DRAW);
+            vbo.setTexCoordData(&tex[0], 4,  GL_DYNAMIC_DRAW);
+            
+            vbo.draw(GL_TRIANGLE_FAN,0, 4);
         
-        glTexCoord2f(s, t);
-        glVertex3f(x + width, y + height, 0);
+        }else {
+            
+            // TODO: change to triangle fan/strip
+            glBegin(GL_QUADS);
+            glTexCoord2f(0, 0);
+            glVertex3f(x, y, 0);
+            
+            glTexCoord2f(s, 0);
+            glVertex3f(x + width, y, 0);
+            
+            glTexCoord2f(s, t);
+            glVertex3f(x + width, y + height, 0);
+            
+            glTexCoord2f(0, t);
+            glVertex3f(x, y + height, 0);
+            glEnd();
+
         
-        glTexCoord2f(0, t);
-        glVertex3f(x, y + height, 0);
-        glEnd();
+        }
+        
+        
     }
 }
