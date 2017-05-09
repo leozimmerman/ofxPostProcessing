@@ -1,7 +1,7 @@
 /*
- *  PixelatePass.h
+ *  InversePass.cpp
  *
- *  Copyright (c) 2013, Neil Mendoza, http://www.neilmendoza.com
+ *  Copyright (c) 2017, satcy, http://satcy.net
  *  All rights reserved. 
  *  
  *  Redistribution and use in source and binary forms, with or without 
@@ -32,20 +32,30 @@
 #pragma once
 
 #include "RenderPass.h"
+#include "ofShader.h"
 
 namespace itg
 {
-    class PixelatePass : public RenderPass
+    class InversePass : public RenderPass
     {
     public:
-        typedef shared_ptr<PixelatePass> Ptr;
         
-        PixelatePass(const ofVec2f& aspect, bool arb, const ofVec2f& resolution = ofVec2f(100.f, 100.f));
+        typedef shared_ptr<InversePass> Ptr;
+        
+        InversePass(const ofVec2f& aspect, bool arb, float amount = 1.0);
         
         void render(ofFbo& readFbo, ofFbo& writeFbo);
-        void setResolution(float x, float y);
+        
+        float getAmount(){ return amount; }
+        void setAmount(float v) { amount = v; }
+        
+        bool hasArbShader() { return true; }
+        
     private:
+        
         ofShader shader;
-        ofVec2f resolution;
+        
+        float amount;
+        
     };
 }

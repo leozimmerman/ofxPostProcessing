@@ -101,6 +101,10 @@ namespace itg
         buildKernel(sigma);
     }
     
+    
+    void ConvolutionPass::setImageIncrement(float x, float y) {
+        imageIncrement.set(x, y);
+    }
     // We lop off the sqrt(2 * pi) * sigma term, since we're going to normalize anyway.
     float ConvolutionPass::gauss(float x, float sigma)
     {

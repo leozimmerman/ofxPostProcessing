@@ -1,7 +1,7 @@
 /*
- *  PixelatePass.cpp
+ *  InversePass.h
  *
- *  Copyright (c) 2013, Neil Mendoza, http://www.neilmendoza.com
+ *  Copyright (c) 2017, satcy, http://satcy.net
  *  All rights reserved. 
  *  
  *  Redistribution and use in source and binary forms, with or without 
@@ -29,44 +29,58 @@
  *  POSSIBILITY OF SUCH DAMAGE. 
  *
  */
-#include "PixelatePass.h"
+#include "InversePass.h"
+#include "ofMain.h"
 
 namespace itg
 {
-    PixelatePass::PixelatePass(const ofVec2f& aspect, bool arb, const ofVec2f& resolution) :
-        resolution(resolution), RenderPass(aspect, arb, "pixelate")
+    InversePass::InversePass(const ofVec2f& aspect, bool arb, float amount) :
+        amount(amount), RenderPass(aspect, arb, "InversePass")
     {
+        
         string fragShaderSrc = STRINGIFY(
-            uniform sampler2D tex;
-            uniform float xPixels;
-            uniform float yPixels;
-            
-            void main()
-            {
-                vec2 texCoords = vec2(floor(gl_TexCoord[0].s * xPixels) / xPixels, floor(gl_TexCoord[0].t * yPixels) / yPixels);
-                gl_FragColor = texture2D(tex, texCoords);
-            }
+                                         uniform SAMPLER_TYPE tDiffuse;
+                                         uniform float amount;
+                        
+                                         void main() {
+                                         vec2 vUv = gl_TexCoord[0].st;
+                                         vec4 ca = TEXTURE_FN(tDiffuse, vUv);
+                                         vec4 cb = vec4(1.0 - ca.r, 1.0 - ca.g, 1.0 - ca.b, ca.a);
+                                         gl_FragColor = ca * (1.0 - amount) + cb * amount;
+                                         
+                                         }
         );
         
-        shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragShaderSrc);
+        ostringstream oss;
+        oss << "#version 120" << endl;
+        if (arb)
+        {
+            oss << "#define SAMPLER_TYPE sampler2DRect" << endl;
+            oss << "#define TEXTURE_FN texture2DRect" << endl;
+            oss << "#extension GL_ARB_texture_rectangle : enable" << endl;
+            oss << fragShaderSrc;
+        }
+        else
+        {
+            oss << "#define SAMPLER_TYPE sampler2D" << endl;
+            oss << "#define TEXTURE_FN texture2D" << endl;
+            oss << fragShaderSrc;
+        }
+    
+        shader.setupShaderFromSource(GL_FRAGMENT_SHADER, oss.str());
         shader.linkProgram();
-#ifdef _ITG_TWEAKABLE
-        addParameter("x", this->resolution.x, "min=1 max=1000");
-        addParameter("y", this->resolution.y, "min=1 max=1000");
-#endif
+        
     }
     
-    void PixelatePass::setResolution(float x, float y) {
-        resolution.set(x, y);
-    }
-    void PixelatePass::render(ofFbo& readFbo, ofFbo& writeFbo)
+
+    void InversePass::render(ofFbo& readFbo, ofFbo& writeFbo)
     {
         writeFbo.begin();
         
         shader.begin();
-        shader.setUniformTexture("tex", readFbo.getTexture(), 0);
-        shader.setUniform1f("xPixels", resolution.x);
-        shader.setUniform1f("yPixels", resolution.y);
+        
+        shader.setUniformTexture("tDiffuse", readFbo.getTexture(), 0);
+        shader.setUniform1f("amount", amount);
         
         texturedQuad(0, 0, writeFbo.getWidth(), writeFbo.getHeight());
         

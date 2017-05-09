@@ -55,6 +55,7 @@
 #include "GodRaysPass.h"
 #include "RimHighlightingPass.h"
 #include "LimbDarkeningPass.h"
+#include "InversePass.h"
 
 typedef itg::PostProcessing ofxPostProcessing;
 

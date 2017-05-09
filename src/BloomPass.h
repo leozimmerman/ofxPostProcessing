@@ -53,6 +53,7 @@ namespace itg
         
         bool hasArbShader() { return true; }
         
+        void setBlur(float x, float y);
     private:
         ConvolutionPass::Ptr xConv;
         ConvolutionPass::Ptr yConv;
