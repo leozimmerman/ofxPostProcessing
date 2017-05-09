@@ -33,8 +33,8 @@
 
 namespace itg
 {
-    NoiseWarpPass::NoiseWarpPass(const ofVec2f& aspect, float frequency, float amplitude, float speed) :
-        frequency(frequency), amplitude(amplitude), speed(speed), RenderPass(aspect, "noisewarp")
+    NoiseWarpPass::NoiseWarpPass(const ofVec2f& aspect, bool arb, float frequency, float amplitude, float speed) :
+        frequency(frequency), amplitude(amplitude), speed(speed), RenderPass(aspect, arb, "noisewarp")
     {
         string fragShaderSrc = STRINGIFY(
             uniform sampler2D tex;
@@ -172,10 +172,10 @@ namespace itg
         writeFbo.begin();
         shader.begin();
         shader.setUniform1f("time", ofGetElapsedTimef());
-        shader.setUniformTexture("tex", readFbo.getTextureReference(), 0);
-        shader.setUniform1f("frequency", 4);
-        shader.setUniform1f("amplitude", 0.1);
-        shader.setUniform1f("speed", 0.1);
+        shader.setUniformTexture("tex", readFbo.getTexture(), 0);
+        shader.setUniform1f("frequency", frequency);
+        shader.setUniform1f("amplitude", amplitude);
+        shader.setUniform1f("speed", speed);
         
         texturedQuad(0, 0, writeFbo.getWidth(), writeFbo.getHeight());
         

@@ -3,7 +3,7 @@
 #include "ofMain.h"
 #include "ofxPostProcessing.h"
 
-class testApp : public ofBaseApp
+class ofApp : public ofBaseApp
 {
 public:
     static const unsigned NUM_BOXES = 100;
@@ -22,4 +22,5 @@ public:
     // boxes
     vector<ofVec3f> posns;
     vector<ofColor> cols;
+    ofVboMesh boxMesh;
 };

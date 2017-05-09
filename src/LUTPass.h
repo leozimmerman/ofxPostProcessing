@@ -32,7 +32,6 @@
 #pragma once
 
 #include "RenderPass.h"
-#include <tr1/memory>
 
 namespace itg
 {
@@ -41,7 +40,7 @@ class LUTPass : public RenderPass
 public:
     typedef shared_ptr<LUTPass> Ptr;
 
-    LUTPass(const ofVec2f& aspect);
+    LUTPass(const ofVec2f& aspect, bool arb);
     ~LUTPass();
 
     LUTPass*loadLUT(string path);

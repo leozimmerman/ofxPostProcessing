@@ -1,10 +1,9 @@
-#include "testApp.h"
+#include "ofApp.h"
 
-void testApp::setup()
+void ofApp::setup()
 {
     ofBackground(0);
-    
-    ofSetCoordHandedness(OF_RIGHT_HANDED);
+    ofSetFrameRate(60);
     
     // Setup post-processing chain
     post.init(ofGetWidth(), ofGetHeight());
@@ -15,6 +14,8 @@ void testApp::setup()
     post.createPass<NoiseWarpPass>()->setEnabled(false);
     post.createPass<PixelatePass>()->setEnabled(false);
     post.createPass<EdgePass>()->setEnabled(false);
+    post.createPass<VerticalTiltShifPass>()->setEnabled(false);
+    post.createPass<GodRaysPass>()->setEnabled(false);
     
     // Setup box positions
     for (unsigned i = 0; i < NUM_BOXES; ++i)
@@ -25,21 +26,21 @@ void testApp::setup()
     
     // Setup light
 	light.setPosition(1000, 1000, 2000);
+    
+    // create our own box mesh as there is a bug with
+    // normal scaling and ofDrawBox() at the moment
+    boxMesh = ofMesh::box(20, 20, 20);
 }
 
-void testApp::update()
+void ofApp::update()
 {
     ofSetWindowTitle(ofToString(ofGetFrameRate()));
 }
 
-void testApp::draw()
+void ofApp::draw()
 {
-    // copy enable part of gl state
-    glPushAttrib(GL_ENABLE_BIT);
-    
     // setup gl state
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    ofEnableDepthTest();
     light.enable();
     
     // begin scene to post process
@@ -49,14 +50,16 @@ void testApp::draw()
     for (unsigned i = 0; i < posns.size(); ++i)
     {
         ofSetColor(cols[i]);
-        ofBox(posns[i], 20);
+        ofPushMatrix();
+        ofTranslate(posns[i]);
+        boxMesh.draw();
+        ofPopMatrix();
     }
+    
+    ofDrawAxis(100);
     
     // end scene and draw
     post.end();
-    
-    // set gl state back to original
-    glPopAttrib();
     
     // draw help
     ofSetColor(0, 255, 255);
@@ -71,7 +74,7 @@ void testApp::draw()
     }
 }
 
-void testApp::keyPressed(int key)
+void ofApp::keyPressed(int key)
 {
     unsigned idx = key - '0';
     if (idx < post.size()) post[idx]->setEnabled(!post[idx]->getEnabled());
