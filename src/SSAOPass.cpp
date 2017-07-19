@@ -71,7 +71,7 @@ namespace itg
 
             // user variables
 
-            const int samples = 8; 		// ao sample count
+            const int samples = 16; 		// ao sample count
             const float radius = 5.0; 	// ao radius
 
             const bool useNoise = false; 		 // use noise instead of pattern for sample dithering
