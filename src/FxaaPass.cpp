@@ -211,6 +211,7 @@ namespace itg
     void FxaaPass::render(ofFbo& readFbo, ofFbo& writeFbo)
     {
         writeFbo.begin();
+        ofClear(0,0,0,0);
         
         shader.begin();
         

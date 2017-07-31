@@ -104,7 +104,7 @@ namespace itg
     void RGBShiftPass::render(ofFbo& readFbo, ofFbo& writeFbo, ofTexture& depthTex)
     {
         writeFbo.begin();
-        
+        ofClear(0,0,0,0);
         
         shader.begin();
         

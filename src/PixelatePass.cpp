@@ -100,6 +100,7 @@ namespace itg
     {
 
         writeFbo.begin();
+        ofClear(0,0,0,0);
         
         shader.begin();
         
