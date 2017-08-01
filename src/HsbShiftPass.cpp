@@ -122,6 +122,8 @@ namespace itg
     void HsbShiftPass::render(ofFbo& readFbo, ofFbo& writeFbo, ofTexture& depth)
     {
         writeFbo.begin();
+        ofClear(0,0,0,0);
+        
         shader.begin();
         shader.setUniformTexture("tex", readFbo.getTexture(), 0);
         shader.setUniform1f("hueShift", hueShift);
