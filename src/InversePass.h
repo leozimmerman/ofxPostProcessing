@@ -1,7 +1,7 @@
 /*
- *  ofxPostProcessing.h
+ *  InversePass.cpp
  *
- *  Copyright (c) 2013, Neil Mendoza, http://www.neilmendoza.com
+ *  Copyright (c) 2017, satcy, http://satcy.net
  *  All rights reserved. 
  *  
  *  Redistribution and use in source and binary forms, with or without 
@@ -31,32 +31,31 @@
  */
 #pragma once
 
-#include "BloomPass.h"
-#include "ConvolutionPass.h"
-#include "DofPass.h"
-#include "DofAltPass.h"
-#include "EdgePass.h"
-#include "FxaaPass.h"
-#include "KaleidoscopePass.h"
-#include "InversePass.h"
-#include "NoiseWarpPass.h"
-#include "PixelatePass.h"
-#include "PostProcessing.h"
 #include "RenderPass.h"
-#include "LUTPass.h"
-#include "ContrastPass.h"
-#include "SSAOPass.h"
-#include "HorizontalTiltShifPass.h"
-#include "VerticalTiltShifPass.h"
-#include "RGBShiftPass.h"
-#include "FakeSSSPass.h"
-#include "ZoomBlurPass.h"
-#include "BleachBypassPass.h"
-#include "ToonPass.h"
-#include "GodRaysPass.h"
-#include "RimHighlightingPass.h"
-#include "LimbDarkeningPass.h"
+#include "ofShader.h"
 
-typedef itg::PostProcessing ofxPostProcessing;
-
-using namespace itg;
+namespace itg
+{
+    class InversePass : public RenderPass
+    {
+    public:
+        
+        typedef shared_ptr<InversePass> Ptr;
+        
+        InversePass(const ofVec2f& aspect, bool arb, float amount = 1.0);
+        
+        void render(ofFbo& readFbo, ofFbo& writeFbo);
+        
+        float getAmount(){ return amount; }
+        void setAmount(float v) { amount = v; }
+        
+        bool hasArbShader() { return true; }
+        
+    private:
+        
+        ofShader shader;
+        
+        float amount;
+        
+    };
+}
