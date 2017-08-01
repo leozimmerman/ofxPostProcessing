@@ -30,7 +30,6 @@
  *
  */
 #include "ZoomBlurPass.h"
-#include "ofMain.h"
 
 namespace itg
 {

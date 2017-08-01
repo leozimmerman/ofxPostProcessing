@@ -30,7 +30,6 @@
  *
  */
 #include "GodRaysPass.h"
-#include "ofMain.h"
 
 namespace itg
 {

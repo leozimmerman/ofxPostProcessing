@@ -30,7 +30,6 @@
  *
  */
 #include "RGBShiftPass.h"
-#include "ofMain.h"
 
 namespace itg
 {

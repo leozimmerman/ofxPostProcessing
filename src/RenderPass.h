@@ -33,7 +33,6 @@
 
 //#define _ITG_TWEAKABLE
 
-#include "ofMain.h"
 //#include "ofFbo.h"
 //#include "ofVec3f.h"
 //#include "ofShader.h"

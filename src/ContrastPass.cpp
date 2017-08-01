@@ -30,7 +30,6 @@
  *
  */
 #include "ContrastPass.h"
-#include "ofMain.h"
 
 namespace itg
 {

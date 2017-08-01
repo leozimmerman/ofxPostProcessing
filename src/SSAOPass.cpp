@@ -30,7 +30,6 @@
  *
  */
 #include "SSAOPass.h"
-#include "ofMain.h"
 
 namespace itg
 {

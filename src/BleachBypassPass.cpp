@@ -30,7 +30,6 @@
  *
  */
 #include "BleachBypassPass.h"
-#include "ofMain.h"
 
 namespace itg
 {
