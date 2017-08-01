@@ -2,31 +2,31 @@
  *  HorizontalTiltShifPass.cpp
  *
  *  Copyright (c) 2013, satcy, http://satcy.net
- *  All rights reserved. 
- *  
- *  Redistribution and use in source and binary forms, with or without 
- *  modification, are permitted provided that the following conditions are met: 
- *  
- *  * Redistributions of source code must retain the above copyright notice, 
- *    this list of conditions and the following disclaimer. 
- *  * Redistributions in binary form must reproduce the above copyright 
- *    notice, this list of conditions and the following disclaimer in the 
- *    documentation and/or other materials provided with the distribution. 
- *  * Neither the name of Neil Mendoza nor the names of its contributors may be used 
- *    to endorse or promote products derived from this software without 
- *    specific prior written permission. 
- *  
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
- *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
- *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
- *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
- *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
- *  POSSIBILITY OF SUCH DAMAGE. 
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *
+ *  * Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *  * Neither the name of Neil Mendoza nor the names of its contributors may be used
+ *    to endorse or promote products derived from this software without
+ *    specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
  *
  */
 #include "HorizontalTiltShifPass.h"
@@ -34,44 +34,89 @@
 namespace itg
 {
     HorizontalTiltShifPass::HorizontalTiltShifPass(const ofVec2f& aspect, bool arb) :
-        RenderPass(aspect, arb, "horizontaltiltshift"), h(2.0/512.0), r(0.5)
+    RenderPass(aspect, arb, "horizontaltiltshift"), h(2.0/512.0), r(0.5)
     {
-        string fragShaderSrc = STRINGIFY(
-             uniform sampler2D tDiffuse;
-             uniform float h;
-             uniform float r;
-             
-             void main() {
-                 vec2 vUv = gl_TexCoord[0].st;
-                 vec4 sum = vec4( 0.0 );
-                 
-                 float hh = h * abs( r - vUv.y );
-                 
-                 sum += texture2D( tDiffuse, vec2( vUv.x - 4.0 * hh, vUv.y ) ) * 0.051;
-                 sum += texture2D( tDiffuse, vec2( vUv.x - 3.0 * hh, vUv.y ) ) * 0.0918;
-                 sum += texture2D( tDiffuse, vec2( vUv.x - 2.0 * hh, vUv.y ) ) * 0.12245;
-                 sum += texture2D( tDiffuse, vec2( vUv.x - 1.0 * hh, vUv.y ) ) * 0.1531;
-                 sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;
-                 sum += texture2D( tDiffuse, vec2( vUv.x + 1.0 * hh, vUv.y ) ) * 0.1531;
-                 sum += texture2D( tDiffuse, vec2( vUv.x + 2.0 * hh, vUv.y ) ) * 0.12245;
-                 sum += texture2D( tDiffuse, vec2( vUv.x + 3.0 * hh, vUv.y ) ) * 0.0918;
-                 sum += texture2D( tDiffuse, vec2( vUv.x + 4.0 * hh, vUv.y ) ) * 0.051;
-                 
-                 gl_FragColor = sum;
-             }
-        );
+        if (isProgrammable){
+            
+            ostringstream oss;
+            oss << "#version 330"<< endl << this->progVertShaderSrc;
+            shader.setupShaderFromSource(GL_VERTEX_SHADER, oss.str());
+            
+            string fragShaderSrc = STRINGIFY(
+                                             uniform sampler2D tDiffuse;
+                                             uniform float h;
+                                             uniform float r;
+                                             
+                                             in vec2 vUv;
+                                             out vec4 fragColor;
+                                             
+                                             void main() {
+                                                 vec4 sum = vec4( 0.0 );
+                                                 
+                                                 float hh = h * abs( r - vUv.y );
+                                                 
+                                                 sum += texture( tDiffuse, vec2( vUv.x - 4.0 * hh, vUv.y ) ) * 0.051;
+                                                 sum += texture( tDiffuse, vec2( vUv.x - 3.0 * hh, vUv.y ) ) * 0.0918;
+                                                 sum += texture( tDiffuse, vec2( vUv.x - 2.0 * hh, vUv.y ) ) * 0.12245;
+                                                 sum += texture( tDiffuse, vec2( vUv.x - 1.0 * hh, vUv.y ) ) * 0.1531;
+                                                 sum += texture( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;
+                                                 sum += texture( tDiffuse, vec2( vUv.x + 1.0 * hh, vUv.y ) ) * 0.1531;
+                                                 sum += texture( tDiffuse, vec2( vUv.x + 2.0 * hh, vUv.y ) ) * 0.12245;
+                                                 sum += texture( tDiffuse, vec2( vUv.x + 3.0 * hh, vUv.y ) ) * 0.0918;
+                                                 sum += texture( tDiffuse, vec2( vUv.x + 4.0 * hh, vUv.y ) ) * 0.051;
+                                                 
+                                                 fragColor = sum;
+                                             }
+                                             );
+            oss.str("");//clear
+            oss << "#version 330" << endl;
+            oss << fragShaderSrc;
+            
+            shader.setupShaderFromSource(GL_FRAGMENT_SHADER, oss.str());
+            shader.linkProgram();
+            
+        }else{
+            
+            string fragShaderSrc = STRINGIFY(
+                                             uniform sampler2D tDiffuse;
+                                             uniform float h;
+                                             uniform float r;
+                                             
+                                             void main() {
+                                                 vec2 vUv = gl_TexCoord[0].st;
+                                                 vec4 sum = vec4( 0.0 );
+                                                 
+                                                 float hh = h * abs( r - vUv.y );
+                                                 
+                                                 sum += texture2D( tDiffuse, vec2( vUv.x - 4.0 * hh, vUv.y ) ) * 0.051;
+                                                 sum += texture2D( tDiffuse, vec2( vUv.x - 3.0 * hh, vUv.y ) ) * 0.0918;
+                                                 sum += texture2D( tDiffuse, vec2( vUv.x - 2.0 * hh, vUv.y ) ) * 0.12245;
+                                                 sum += texture2D( tDiffuse, vec2( vUv.x - 1.0 * hh, vUv.y ) ) * 0.1531;
+                                                 sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;
+                                                 sum += texture2D( tDiffuse, vec2( vUv.x + 1.0 * hh, vUv.y ) ) * 0.1531;
+                                                 sum += texture2D( tDiffuse, vec2( vUv.x + 2.0 * hh, vUv.y ) ) * 0.12245;
+                                                 sum += texture2D( tDiffuse, vec2( vUv.x + 3.0 * hh, vUv.y ) ) * 0.0918;
+                                                 sum += texture2D( tDiffuse, vec2( vUv.x + 4.0 * hh, vUv.y ) ) * 0.051;
+                                                 
+                                                 gl_FragColor = sum;
+                                             }
+                                             );
+            
+            shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragShaderSrc);
+            shader.linkProgram();
+        }
         
-        shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragShaderSrc);
-        shader.linkProgram();
 #ifdef _ITG_TWEAKABLE
         addParameter("f", this->h, "min=0 max=1");
         addParameter("r", this->r, "min=0 max=1");
 #endif
+        
     }
     
     void HorizontalTiltShifPass::render(ofFbo& readFbo, ofFbo& writeFbo)
     {
         writeFbo.begin();
+        ofClear(0,0,0,0);
         
         shader.begin();
         shader.setUniformTexture("tDiffuse", readFbo.getTexture(), 0);
