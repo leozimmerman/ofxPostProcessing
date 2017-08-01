@@ -51,7 +51,7 @@ namespace itg
 #endif
     {
     public:
-        typedef shared_ptr<RenderPass> Ptr;
+        typedef std::shared_ptr<RenderPass> Ptr;
         
         RenderPass(const ofVec2f& aspect, bool arb, const string& name);
         

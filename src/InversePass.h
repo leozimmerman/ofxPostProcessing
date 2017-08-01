@@ -40,7 +40,7 @@ namespace itg
     {
     public:
         
-        typedef shared_ptr<InversePass> Ptr;
+        typedef std::shared_ptr<InversePass> Ptr;
         
         InversePass(const ofVec2f& aspect, bool arb, float amount = 1.0);
         
