@@ -56,8 +56,10 @@ post.begin(cam);
 post.end();
 ```
 
+## IN PROGRESS
+* Add support for ofGLProgrammableRenderer with version 330 shaders
+
 ## TODO
-* Add support for ofGLProgrammableRenderer with version 150 shaders
 * More FX
 * OpenGL ES, it's based around power of two textures so it should be fairly quick to get working. 
 
