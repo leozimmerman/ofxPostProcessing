@@ -100,11 +100,11 @@ namespace itg
         
         ofMatrixMode(OF_MATRIX_PROJECTION);
         ofPushMatrix();
-        ofLoadMatrix(glm::value_ptr(cam.getProjectionMatrix(ofRectangle(0, 0, width, height))));
+        ofLoadMatrix(cam.getProjectionMatrix(ofRectangle(0, 0, width, height).getPtr()));
         
         ofMatrixMode(OF_MATRIX_MODELVIEW);
         ofPushMatrix();
-        ofLoadMatrix(glm::value_ptr(cam.getModelViewMatrix()));
+        ofLoadMatrix(cam.getModelViewMatrix().getPtr());
         
         ofViewport(0, 0, raw.getWidth(), raw.getHeight());
         
@@ -159,8 +159,8 @@ namespace itg
         
         ofMatrixMode(OF_MATRIX_PROJECTION);
         ofPushMatrix();
-        ofLoadMatrix(glm::value_ptr(cam.getProjectionMatrix(ofRectangle(0, 0, width, height))));
-        ofLoadMatrix(glm::value_ptr(cam.getProjectionMatrix(viewprt)));
+        ofLoadMatrix(cam.getProjectionMatrix(ofRectangle(0, 0, width, height).getPtr()));
+        ofLoadMatrix(am.getProjectionMatrix(viewprt).getPtr());
         
         ofMatrixMode(OF_MATRIX_MODELVIEW);
         ofPushMatrix();
