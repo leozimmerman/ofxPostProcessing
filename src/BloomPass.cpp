@@ -60,6 +60,13 @@ namespace itg
         for (int i = 0; i < 2; ++i) fbos[i].allocate(s);
     }
     
+    
+    void BloomPass::setBlur(float x, float y) {
+        xConv->setImageIncrement(x, 0);
+        yConv->setImageIncrement(0, (aspect.x / aspect.y) * y);
+        
+    }
+    
     void BloomPass::allocateSelectiveGlow(unsigned w, unsigned h)
     {
         this->w = w;

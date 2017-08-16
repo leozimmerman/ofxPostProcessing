@@ -51,7 +51,7 @@ namespace itg
         void render(ofFbo& readFbo, ofFbo& writeFbo);
         
         bool hasArbShader() { return true; }
-    
+        void setImageIncrement(float x, float y);
     private:
         float gauss(float x, float sigma);
         void buildKernel(float sigma);

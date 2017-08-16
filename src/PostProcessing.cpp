@@ -73,6 +73,7 @@ namespace itg
     //--------------------------------------
     void PostProcessing::begin()
     {
+
         raw.begin(ofFboBeginMode::NoDefaults);
         
         ofMatrixMode(OF_MATRIX_PROJECTION);
@@ -104,7 +105,6 @@ namespace itg
         ofMatrixMode(OF_MATRIX_MODELVIEW);
         ofPushMatrix();
         ofLoadMatrix(glm::value_ptr(cam.getModelViewMatrix()));
-        
         
         ofViewport(0, 0, raw.getWidth(), raw.getHeight());
         
@@ -146,12 +146,8 @@ namespace itg
         glPopAttrib();
         ofPopStyle();
         
-        
-        
-        
     }
     //--------------------------------------
-    ///my tweak :)
     void PostProcessing::begin(ofCamera& cam, ofRectangle viewprt)
     {
         
@@ -195,10 +191,6 @@ namespace itg
     {
         if (flip)
         {
-            //            glPushMatrix();
-            //            glTranslatef(x, y + h, 0);
-            //            glScalef(1, -1, 1);
-            
             ofPushMatrix();
             ofTranslate(x, y + h, 0);
             ofScale(1, -1, 1);
@@ -208,8 +200,7 @@ namespace itg
         
         if (numProcessedPasses == 0) raw.draw(0, 0, w, h);
         else pingPong[currentReadFbo].draw(0, 0, w, h);
-        
-        //if (flip) glPopMatrix();
+
         if (flip) ofPopMatrix();
     }
     //--------------------------------------

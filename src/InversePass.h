@@ -57,5 +57,5 @@ namespace itg
         
         float amount;
         
-    };
+    }
 }
