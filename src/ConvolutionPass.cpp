@@ -37,194 +37,191 @@ namespace itg
     imageIncrement(imageIncrement), RenderPass(aspect, arb, "convolution")
     {
         if (isProgrammable){
-            string vertShaderSrc1 = STRINGIFY(
-                                              uniform vec2 imageIncrement;
-                                              uniform vec2 resolution;
-                                              
-                                              uniform mat4 modelViewProjectionMatrix;
-                                              
-                                              out vec2 vUv;
-                                              
-                                              layout(location = 0) in vec4 position;
-                                              layout(location = 3) in vec2 texcoord;
-                                              
-                                              out vec2 scaledImageIncrement;
-                                              out vec3 pos;
-                                              
-                                              void main()
-                                              {
-                                                  scaledImageIncrement = imageIncrement * resolution;
-                                                  vUv = texcoord - ( ( KERNEL_SIZE - 1.0 ) / 2.0 ) * scaledImageIncrement;
-                                                  );
-                                                  string vertShaderSrc2 = STRINGIFY(
-                                                                                    pos = position.xyz;
-                                                                                    gl_Position = modelViewProjectionMatrix * position;
-                                                                                    }
-                                                                                    );
-                                                  ostringstream oss;
-                                                  oss << "#version 330" << endl;
-                                                  oss << "#define KERNEL_SIZE " << kernelSize << ".0" << endl;
-                                                  oss << vertShaderSrc1 << endl; // split in 2 to help debug
-                                                  oss << vertShaderSrc2;
-                                                  
-                                                  shader.setupShaderFromSource(GL_VERTEX_SHADER, oss.str());
-                                                  
-                                                  string fragShaderSrc = STRINGIFY(
-                                                                                   
-                                                                                   uniform float kernel[KERNEL_SIZE];
-                                                                                   uniform vec2 imageIncrement;
-                                                                                   uniform sampler2D readTex;
-                                                                                   uniform float amount;
-                                                                                   uniform float angle;
-                                                                                   
-                                                                                   in vec2 scaledImageIncrement;
-                                                                                   in vec2 vUv;
-                                                                                   
-                                                                                   layout(location = 0) out vec4 fragColor;
-                                                                                   
-                                                                                   void main(){
-                                                                                       
-                                                                                       vec2 imageCoord = vUv;
-                                                                                       vec4 sum = vec4( 0.0, 0.0, 0.0, 0.0 );
-                                                                                       
-                                                                                       for( int i = 0; i < KERNEL_SIZE; i++ )
-                                                                                       {
-                                                                                           sum += texture( readTex, imageCoord ) * kernel[ i ];
-                                                                                           imageCoord += scaledImageIncrement;
-                                                                                       }
-                                                                                       
-                                                                                       fragColor = sum;
-                                                                                       
-                                                                                   }
-                                                                                   );
-                                                  oss.str("");//clear
-                                                  oss << "#version 330" << endl;
-                                                  oss << "#define KERNEL_SIZE " << kernelSize << endl;
-                                                  oss << fragShaderSrc;
-                                                  
-                                                  shader.setupShaderFromSource(GL_FRAGMENT_SHADER, oss.str());
-                                                  shader.linkProgram();
-                                                  
-                                                  
-                                              } else {
-                                                  string vertShaderSrc = STRINGIFY(
-                                                                                   uniform vec2 imageIncrement;
-                                                                                   uniform vec2 resolution;
-                                                                                   
-                                                                                   varying vec2 vUv;
-                                                                                   varying vec2 scaledImageIncrement;
-                                                                                   
-                                                                                   void main()
-                                                                                   {
-                                                                                       gl_TexCoord[0] = gl_MultiTexCoord0;
-                                                                                       scaledImageIncrement = imageIncrement * resolution;
-                                                                                       vUv = gl_TexCoord[0].st - ( ( KERNEL_SIZE - 1.0 ) / 2.0 ) * scaledImageIncrement;
-                                                                                       gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-                                                                                   }
-                                                                                   );
-                                                  
-                                                  
-                                                  ostringstream oss;
-                                                  oss << "#version 120\n#define KERNEL_SIZE " << kernelSize << ".0" << endl << vertShaderSrc;
-                                                  shader.setupShaderFromSource(GL_VERTEX_SHADER, oss.str());
-                                                  
-                                                  string fragShaderSrc = STRINGIFY(
-                                                                                   uniform float kernel[KERNEL_SIZE];
-                                                                                   uniform SAMPLER_TYPE readTex;
-                                                                                   uniform vec2 imageIncrement;
-                                                                                   
-                                                                                   varying vec2 vUv;
-                                                                                   varying vec2 scaledImageIncrement;
-                                                                                   
-                                                                                   void main()
-                                                                                   {
-                                                                                       
-                                                                                       vec2 imageCoord = vUv;
-                                                                                       vec4 sum = vec4( 0.0, 0.0, 0.0, 0.0 );
-                                                                                       
-                                                                                       for( int i = 0; i < KERNEL_SIZE; i++ )
-                                                                                       {
-                                                                                           sum += TEXTURE_FN( readTex, imageCoord ) * kernel[ i ];
-                                                                                           imageCoord += scaledImageIncrement;
-                                                                                       }
-                                                                                       
-                                                                                       gl_FragColor = sum;
-                                                                                   }
-                                                                                   );
-                                                  
-                                                  oss.str("");
-                                                  oss << "#version 120\n#define KERNEL_SIZE " << kernelSize << endl;
-                                                  if (arb)
-                                                  {
-                                                      oss << "#define SAMPLER_TYPE sampler2DRect" << endl;
-                                                      oss << "#define TEXTURE_FN texture2DRect" << endl;
-                                                  }
-                                                  else
-                                                  {
-                                                      oss << "#define SAMPLER_TYPE sampler2D" << endl;
-                                                      oss << "#define TEXTURE_FN texture2D" << endl;
-                                                  }
-                                                  oss << fragShaderSrc;
-                                                  shader.setupShaderFromSource(GL_FRAGMENT_SHADER, oss.str());
-                                                  shader.linkProgram();
-                                              }
-                                              // build kernel
-                                              buildKernel(sigma);
-                                              
-                                              }
-                                              void ConvolutionPass::setImageIncrement(float x, float y) {
-                                                  imageIncrement.set(x, y);
-                                              }
-                                              
-                                              // We lop off the sqrt(2 * pi) * sigma term, since we're going to normalize anyway.
-                                              float ConvolutionPass::gauss(float x, float sigma)
-                                              {
-                                                  return expf( -( x * x ) / ( 2.0 * sigma * sigma ) );
-                                              }
-                                              
-                                              void ConvolutionPass::render(ofFbo& readFbo, ofFbo& writeFbo)
-                                              {
-                                                  writeFbo.begin();
-                                                  
-                                                  ofClear(0, 0, 0, 0);
-                                                  
-                                                  shader.begin();
-                                                  
-                                                  shader.setUniformTexture("readTex", readFbo, 0);
-                                                  shader.setUniform2f("imageIncrement", imageIncrement.x, imageIncrement.y);
-                                                  shader.setUniform1fv("kernel", kernel.data(), kernel.size());
-                                                  if (arb) shader.setUniform2i("resolution", readFbo.getWidth(), readFbo.getHeight());
-                                                  else shader.setUniform2f("resolution", 1.f, 1.f);
-                                                  
-                                                  if (arb) texturedQuad(0, 0, writeFbo.getWidth(), writeFbo.getHeight(), readFbo.getWidth(), readFbo.getHeight());
-                                                  else texturedQuad(0, 0, writeFbo.getWidth(), writeFbo.getHeight());
-                                                  
-                                                  shader.end();
-                                                  writeFbo.end();
-                                              }
-                                              
-                                              void ConvolutionPass::buildKernel(float sigma)
-                                              {
-                                                  unsigned kernelSize = 2 * ceil( sigma * 3.0 ) + 1;
-                                                  
-                                                  if (kernelSize > MAX_KERNEL_SIZE) kernelSize = MAX_KERNEL_SIZE;
-                                                  
-                                                  kernel.clear();
-                                                  kernel.reserve(kernelSize);
-                                                  
-                                                  float halfWidth = ( kernelSize - 1 ) * 0.5;
-                                                  
-                                                  float sum = 0.0;
-                                                  for (unsigned i = 0; i < kernelSize; ++i )
-                                                  {
-                                                      kernel.push_back(gauss(i - halfWidth, sigma));
-                                                      sum += kernel.back();
-                                                  }
-                                                  
-                                                  // normalize the kernel
-                                                  for (unsigned i = 0; i < kernelSize; ++i )
-                                                  {
-                                                      kernel[ i ] /= sum;
-                                                  }
-                                              }
-                                              }
+            string vertShaderSrc = STRINGIFY(
+                                             uniform vec2 imageIncrement;
+                                             uniform vec2 resolution;
+                                             
+                                             uniform mat4 modelViewProjectionMatrix;
+                                             
+                                             out vec2 vUv;
+                                             
+                                             layout(location = 0) in vec4 position;
+                                             layout(location = 3) in vec2 texcoord;
+                                             
+                                             out vec2 scaledImageIncrement;
+                                             
+                                             void main()
+                                             {
+                                                 scaledImageIncrement = imageIncrement * resolution;
+                                                 vUv = texcoord - ( ( KERNEL_SIZE - 1.0 ) / 2.0 ) * scaledImageIncrement;
+                                                 
+                                                 gl_Position = modelViewProjectionMatrix * position;
+                                             }
+                                             );
+            
+            ostringstream oss;
+            oss << "#version 330" << endl;
+            oss << "#define KERNEL_SIZE " << kernelSize << ".0" << endl;
+            oss << vertShaderSrc << endl;
+            
+            shader.setupShaderFromSource(GL_VERTEX_SHADER, oss.str());
+            
+            string fragShaderSrc = STRINGIFY(
+                                             
+                                             uniform float kernel[KERNEL_SIZE];
+                                             uniform vec2 imageIncrement;
+                                             uniform sampler2D readTex;
+                                             uniform float amount;
+                                             uniform float angle;
+                                             
+                                             in vec2 scaledImageIncrement;
+                                             in vec2 vUv;
+                                             
+                                             layout(location = 0) out vec4 fragColor;
+                                             
+                                             void main(){
+                                                 
+                                                 vec2 imageCoord = vUv;
+                                                 vec4 sum = vec4( 0.0, 0.0, 0.0, 0.0 );
+                                                 
+                                                 for( int i = 0; i < KERNEL_SIZE; i++ )
+                                                 {
+                                                     sum += texture( readTex, imageCoord ) * kernel[ i ];
+                                                     imageCoord += scaledImageIncrement;
+                                                 }
+                                                 
+                                                 fragColor = sum;
+                                                 
+                                             }
+                                             );
+            oss.str("");//clear
+            oss << "#version 330" << endl;
+            oss << "#define KERNEL_SIZE " << kernelSize << endl;
+            oss << fragShaderSrc;
+            
+            shader.setupShaderFromSource(GL_FRAGMENT_SHADER, oss.str());
+            shader.linkProgram();
+            
+            
+        } else {
+            string vertShaderSrc = STRINGIFY(
+                                             uniform vec2 imageIncrement;
+                                             uniform vec2 resolution;
+                                             
+                                             varying vec2 vUv;
+                                             varying vec2 scaledImageIncrement;
+                                             
+                                             void main()
+                                             {
+                                                 gl_TexCoord[0] = gl_MultiTexCoord0;
+                                                 scaledImageIncrement = imageIncrement * resolution;
+                                                 vUv = gl_TexCoord[0].st - ( ( KERNEL_SIZE - 1.0 ) / 2.0 ) * scaledImageIncrement;
+                                                 gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+                                             }
+                                             );
+            
+            
+            ostringstream oss;
+            oss << "#version 120\n#define KERNEL_SIZE " << kernelSize << ".0" << endl << vertShaderSrc;
+            shader.setupShaderFromSource(GL_VERTEX_SHADER, oss.str());
+            
+            string fragShaderSrc = STRINGIFY(
+                                             uniform float kernel[KERNEL_SIZE];
+                                             uniform SAMPLER_TYPE readTex;
+                                             uniform vec2 imageIncrement;
+                                             
+                                             varying vec2 vUv;
+                                             varying vec2 scaledImageIncrement;
+                                             
+                                             void main()
+                                             {
+                                                 
+                                                 vec2 imageCoord = vUv;
+                                                 vec4 sum = vec4( 0.0, 0.0, 0.0, 0.0 );
+                                                 
+                                                 for( int i = 0; i < KERNEL_SIZE; i++ )
+                                                 {
+                                                     sum += TEXTURE_FN( readTex, imageCoord ) * kernel[ i ];
+                                                     imageCoord += scaledImageIncrement;
+                                                 }
+                                                 
+                                                 gl_FragColor = sum;
+                                             }
+                                             );
+            
+            oss.str("");
+            oss << "#version 120\n#define KERNEL_SIZE " << kernelSize << endl;
+            if (arb)
+            {
+                oss << "#define SAMPLER_TYPE sampler2DRect" << endl;
+                oss << "#define TEXTURE_FN texture2DRect" << endl;
+            }
+            else
+            {
+                oss << "#define SAMPLER_TYPE sampler2D" << endl;
+                oss << "#define TEXTURE_FN texture2D" << endl;
+            }
+            oss << fragShaderSrc;
+            shader.setupShaderFromSource(GL_FRAGMENT_SHADER, oss.str());
+            shader.linkProgram();
+        }
+        // build kernel
+        buildKernel(sigma);
+        
+    }
+    void ConvolutionPass::setImageIncrement(float x, float y) {
+        imageIncrement.set(x, y);
+    }
+    
+    // We lop off the sqrt(2 * pi) * sigma term, since we're going to normalize anyway.
+    float ConvolutionPass::gauss(float x, float sigma)
+    {
+        return expf( -( x * x ) / ( 2.0 * sigma * sigma ) );
+    }
+    
+    void ConvolutionPass::render(ofFbo& readFbo, ofFbo& writeFbo)
+    {
+        writeFbo.begin();
+        
+        ofClear(0, 0, 0, 0);
+        
+        shader.begin();
+        
+        shader.setUniformTexture("readTex", readFbo, 0);
+        shader.setUniform2f("imageIncrement", imageIncrement.x, imageIncrement.y);
+        shader.setUniform1fv("kernel", kernel.data(), kernel.size());
+        if (arb) shader.setUniform2i("resolution", readFbo.getWidth(), readFbo.getHeight());
+        else shader.setUniform2f("resolution", 1.f, 1.f);
+        
+        if (arb) texturedQuad(0, 0, writeFbo.getWidth(), writeFbo.getHeight(), readFbo.getWidth(), readFbo.getHeight());
+        else texturedQuad(0, 0, writeFbo.getWidth(), writeFbo.getHeight());
+        
+        shader.end();
+        writeFbo.end();
+    }
+    
+    void ConvolutionPass::buildKernel(float sigma)
+    {
+        unsigned kernelSize = 2 * ceil( sigma * 3.0 ) + 1;
+        
+        if (kernelSize > MAX_KERNEL_SIZE) kernelSize = MAX_KERNEL_SIZE;
+        
+        kernel.clear();
+        kernel.reserve(kernelSize);
+        
+        float halfWidth = ( kernelSize - 1 ) * 0.5;
+        
+        float sum = 0.0;
+        for (unsigned i = 0; i < kernelSize; ++i )
+        {
+            kernel.push_back(gauss(i - halfWidth, sigma));
+            sum += kernel.back();
+        }
+        
+        // normalize the kernel
+        for (unsigned i = 0; i < kernelSize; ++i )
+        {
+            kernel[ i ] /= sum;
+        }
+    }
+}
