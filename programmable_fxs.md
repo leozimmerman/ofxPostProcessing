@@ -1,13 +1,19 @@
 # Fxs adapted for OpenGL 3.3+
 
 - Bleach Bypass
+- Bloom
 - Contrast
-- Horizontal Tilt Shift
-- Vertical Tilt Shift
-- Pixelate
-- HSB Shift
-- RGB Shift
+- Convolution
+- Depth of Field
+- Edge Pass
+- Fxaa
 - Inverse
 - Kaleidoscope
 - Limb Darkening
-- Fxaa
+- Pixelate
+- Horizontal Tilt Shift
+- Vertical Tilt Shift
+- HSB Shift
+- RGB Shift
+- Saturation
+- Zoom Blur
