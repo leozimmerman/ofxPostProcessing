@@ -96,10 +96,14 @@ namespace itg
 #endif
     }
     
+    void PixelatePass::setResolution(float x, float y) {
+        resolution.set(x, y);
+    }
     void PixelatePass::render(ofFbo& readFbo, ofFbo& writeFbo)
     {
 
         writeFbo.begin();
+        ofClear(0,0,0,0);
         
         shader.begin();
         

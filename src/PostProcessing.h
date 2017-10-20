@@ -39,7 +39,7 @@ namespace itg
     class PostProcessing : public ofBaseDraws
     {
     public:
-        typedef shared_ptr<PostProcessing> Ptr;
+        typedef std::shared_ptr<PostProcessing> Ptr;
         
         void init(unsigned width = ofGetWidth(), unsigned height = ofGetHeight(), bool arb = false);
         void begin();
@@ -56,9 +56,9 @@ namespace itg
         void debugDraw();
         
         template<class T>
-        shared_ptr<T> createPass()
+        std::shared_ptr<T> createPass()
         {
-            shared_ptr<T> pass = shared_ptr<T>(new T(ofVec2f(width, height), arb));
+            std::shared_ptr<T> pass = std::shared_ptr<T>(new T(ofVec2f(width, height), arb));
             passes.push_back(pass);
             return pass;
         }
@@ -76,7 +76,7 @@ namespace itg
         
         unsigned size() const { return passes.size(); }
         RenderPass::Ptr operator[](unsigned i) const { return passes[i]; }
-        vector<RenderPass::Ptr>& getPasses() { return passes; }
+        std::vector<RenderPass::Ptr>& getPasses() { return passes; }
         unsigned getNumProcessedPasses() const { return numProcessedPasses; }
         
         ofFbo& getRawRef() { return raw; }

@@ -38,6 +38,7 @@
 #include "EdgePass.h"
 #include "FxaaPass.h"
 #include "KaleidoscopePass.h"
+#include "InversePass.h"
 #include "NoiseWarpPass.h"
 #include "PixelatePass.h"
 #include "PostProcessing.h"
@@ -55,6 +56,7 @@
 #include "GodRaysPass.h"
 #include "RimHighlightingPass.h"
 #include "LimbDarkeningPass.h"
+#include "InversePass.h"
 
 typedef itg::PostProcessing ofxPostProcessing;
 
